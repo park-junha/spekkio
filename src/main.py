@@ -1,46 +1,89 @@
+from github import Github
+from github.GitTag import GitTag
+from github.GitRef import GitRef
+from github.PullRequest import PullRequest
+from github.PullRequestMergeStatus import PullRequestMergeStatus
+from github.Repository import Repository
 from enum import Enum
-import git
+from dotenv import load_dotenv
 import os
 
-class CommitMode(Enum):
-  squash: int = 0
-  rebase: int = 1
-  merge: int = 2
+class MergeMode(Enum):
+  squash = 0
+  rebase = 1
+  merge = 2
 
-def commit_branch(repo: git.Repo, branch: str, base_branch: str,
-  commit_message: str, commit_mode: CommitMode):
-  r = repo.git
-  if commit_mode == CommitMode.squash:
-    print('Merge mode: Squash\n')
+class MergeCommitInfo():
+  def __init__(self, pr_id: int, merge_mode: MergeMode, commit_title: str,
+    commit_message: str = ''):
+    self.pr_id: int = pr_id
+    self.commit_title: str = commit_title
+    self.commit_message: str = commit_message
+    self.merge_mode: str = merge_mode.name
 
-    print(f'Checking out branch {base_branch}...')
-    r.checkout(base_branch)
-    print(f'Successfully checked out branch {base_branch}!')
+class TagInfo():
+  def __init__(self, tag: str, tag_message: str):
+    self.tag: str = tag
+    self.tag_message: str = tag_message
 
-    print(f'Squash merging {branch} to {base_branch}...')
-    r.merge('--squash', branch)
-    print(f'Successfully squash merged {branch} to {base_branch}!')
+def merge_and_tag(repo: Repository, merge_params: MergeCommitInfo,
+  tag_params: TagInfo):
 
-    print(f'Committing with message ${commit_message}...')
-    repo.index.commit(commit_message)
-    print(f'Successfully committed!')
+  # Get PR
+  pr: PullRequest = repo.get_pull(merge_params.pr_id)
 
-    print(f'Tagging with tag...')
-    r.tag('-a', '0.0.0', '-m', 'test')
-    print(f'Successfully tagged!')
+  # Check if PR was successfully fetched
+  if pr.number != merge_params.pr_id:
+    raise Exception(f'Could not fetch PR {merge_params.pr_id}')
 
-#   r.push()
-#   r.push('--tags')
+  # Merge PR
+  pr_merge_status: PullRequestMergeStatus = pr.merge(
+    merge_params.commit_message,
+    merge_params.commit_title,
+    merge_params.merge_mode
+  )
 
-    print('Done!')
-    return
+  # Check if PR was successfully merged
+  if pr_merge_status.merged == False:
+    raise Exception(f'PR {merge_params.pr_id} was not ' + \
+      'successfully merged.')
 
-  if commit_mode == CommitMode.rebase:
-    raise Exception('Not yet implemented')
-  if commit_mode == CommitMode.merge:
-    raise Exception('Not yet implemented')
+  # Make an annotated tag at the resulting commit SHA
+  resulting_tag: GitTag = repo.create_git_tag(
+    tag_params.tag,
+    tag_params.tag_message,
+    pr_merge_status.sha,
+    'commit'
+  )
+  annotated_tag: GitRef = repo.create_git_ref(
+    f'refs/tags/{resulting_tag.tag}',
+    resulting_tag.sha
+  )
+
+  # Check if tag was successfully created
+  if annotated_tag.object.sha != resulting_tag.sha or \
+    resulting_tag.tag != tag_params.tag:
+    raise Exception(f'Tag {tag_params.tag} was not ' + \
+      'successfully created.')
+
+  return
 
 if __name__ == '__main__':
-  repo_dir = os.path.abspath('/Users/junha/cave/testzone/20201108')
-  repo = git.Repo(repo_dir)
-  commit_branch(repo, 't1', 'master', 'squash success!!', CommitMode.squash)
+  load_dotenv()
+  env = {
+    'token': os.getenv('TOKEN'),
+    'username': os.getenv('USERNAME'),
+    'repo': os.getenv('FULL_REPO_NAME')
+  }
+  conn = Github(env['token'])
+
+  # Get GitHub repository
+  try:
+    repo = conn.get_repo(env['repo'])
+  except:
+    raise Exception('Repository not found')
+
+  merge_params = MergeCommitInfo(1, MergeMode.squash, 'test', 'moretest')
+  tag_params = TagInfo('0.0.0', 'tagtest')
+
+  merge_and_tag(repo, merge_params, tag_params)
