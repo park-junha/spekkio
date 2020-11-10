@@ -1,36 +1,63 @@
 from enum import Enum
+from dotenv import load_dotenv
 import git
 import os
 
 class CommitMode(Enum):
-  squash: int = 0
-  rebase: int = 1
-  merge: int = 2
+  squash = 0
+  rebase = 1
+  merge = 2
 
-def commit_branch(repo: git.Repo, branch: str, base_branch: str,
-  commit_message: str, commit_mode: CommitMode):
+class MergeCommitInfo():
+  def __init__(self, branch: str, base_branch: str, commit_title: str,
+    commit_author: str, commit_author_email: str, commit_mode: CommitMode):
+    self.branch: str = branch
+    self.base_branch: str = base_branch
+    self.commit_title: str = commit_title
+    self.commit_author: str = commit_author
+    self.commit_author_email: str = commit_author_email
+    self.commit_mode: CommitMode = commit_mode
+
+class TagInfo():
+  def __init__(self, tag: str, message: str):
+    self.tag: str = tag
+    self.message: str = message
+
+def commit_branch(repo: git.Repo, merge_params: MergeCommitInfo,
+  tag_params: TagInfo):
   r = repo.git
-  if commit_mode == CommitMode.squash:
+
+  if merge_params.commit_mode == CommitMode.squash:
     print('Merge mode: Squash\n')
 
-    print(f'Checking out branch {base_branch}...')
-    r.checkout(base_branch)
-    print(f'Successfully checked out branch {base_branch}!')
+    print(f'Checking out branch {merge_params.base_branch}...')
+    r.checkout(merge_params.base_branch)
+    print(f'Successfully checked out branch {merge_params.base_branch}!')
 
-    print(f'Squash merging {branch} to {base_branch}...')
-    r.merge('--squash', branch)
-    print(f'Successfully squash merged {branch} to {base_branch}!')
+    print(f'Squash merging {merge_params.branch} to ' + \
+      f'{merge_params.base_branch}...')
+    r.merge('--squash', merge_params.branch)
+    print(f'Successfully squash merged {merge_params.branch} to ' + \
+      f'{merge_params.base_branch}!')
 
-    print(f'Committing with message ${commit_message}...')
-    repo.index.commit(commit_message)
+    print(f'Committing with message ${merge_params.commit_title}...')
+    r.commit(
+      '-m',
+      merge_params.commit_title,
+      '--author',
+      f'{merge_params.commit_author} <{merge_params.commit_author_email}>')
     print(f'Successfully committed!')
 
-    print(f'Tagging with tag...')
-    r.tag('-a', '0.0.0', '-m', 'test')
+    print(f'Tagging with tag {tag_params.tag}...')
+    r.tag(
+      '-a',
+      tag_params.tag,
+      '-m',
+      tag_params.message)
     print(f'Successfully tagged!')
 
-#   r.push()
-#   r.push('--tags')
+    r.push()
+    r.push('--tags')
 
     print('Done!')
     return
@@ -41,6 +68,34 @@ def commit_branch(repo: git.Repo, branch: str, base_branch: str,
     raise Exception('Not yet implemented')
 
 if __name__ == '__main__':
+  load_dotenv()
+  env = {
+    'user': os.getenv('USER'),
+    'email': os.getenv('EMAIL')
+  }
+
   repo_dir = os.path.abspath('/Users/junha/cave/testzone/20201108')
-  repo = git.Repo(repo_dir)
-  commit_branch(repo, 't1', 'master', 'squash success!!', CommitMode.squash)
+# repo_dir = os.getcwd()
+  repo: git.Repo = git.Repo(repo_dir)
+  repo.config_writer().set_value('user', 'name', env['user']).release()
+  repo.config_writer().set_value('user', 'email', env['email']).release()
+
+  merge_params = MergeCommitInfo(
+    't1',
+    'master',
+    'success wooo',
+    'park-junha',
+    'jpark3@scu.edu',
+    CommitMode.squash)
+
+  tag_params = TagInfo(
+    '0.0.0',
+    'wooo again')
+
+  commit_branch(repo, merge_params, tag_params)
+
+  # TODO: replace this HACK
+  os.system('git config --local --unset user.name')
+  os.system('git config --local --unset user.email')
+
+  # does not close PR
