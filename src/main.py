@@ -1,4 +1,5 @@
 from github import Github
+from github.Branch import Branch
 from github.GitTag import GitTag
 from github.GitRef import GitRef
 from github.PullRequest import PullRequest
@@ -36,11 +37,19 @@ def merge_and_tag(repo: Repository, merge_params: MergeCommitInfo,
   if pr.number != merge_params.pr_id:
     raise Exception(f'Could not fetch PR {merge_params.pr_id}')
 
-  # TODO: create temp branch off latest base branch
+  # Create temp branch off latest base branch
+  source_base_branch: Branch = repo.get_branch(pr.base.ref)
 
-  # TODO: change PR base branch to temp branch
+  temp_base_branch: str = f'temp_{pr.head.ref}'
+  repo.create_git_ref(
+    ref=f'refs/heads/{temp_base_branch}',
+    sha=source_base_branch.commit.sha
+  )
 
-  # Merge PR
+  # Change PR base branch to temp branch
+  pr.edit(base=temp_base_branch)
+
+  # Merge PR to temp branch
   pr_merge_status: PullRequestMergeStatus = pr.merge(
     merge_params.commit_message,
     merge_params.commit_title,
@@ -52,20 +61,37 @@ def merge_and_tag(repo: Repository, merge_params: MergeCommitInfo,
     raise Exception(f'PR {merge_params.pr_id} was not ' + \
       'successfully merged.')
 
-  # TODO: open a new PR to merge temp branch to original base branch
+  # Open a new PR to merge temp branch to original base branch
+  temp_pr: PullRequest = repo.create_pull(
+    title=f'[spekkio-bot] merge pr {merge_params.pr_id}',
+    body='Opened by Spekkio.',
+    base=source_base_branch.name,
+    head=temp_base_branch,
+    draft=False
+  )
 
-  # TODO: rebase merge the new PR to original base branch
+  # Rebase merge the new PR to original base branch
+  temp_pr_merge_status: PullRequestMergeStatus = temp_pr.merge(
+    merge_params.commit_message,
+    merge_params.commit_title,
+    MergeMode.rebase.name
+  )
 
-  # TODO: delete temp branch
+  # Check if PR was successfully merged
+  if temp_pr_merge_status.merged == False:
+    raise Exception(f'Temp PR was not successfully merged.')
 
-  # TODO: delete temp PR (?)
+  # Delete temp branch
+  repo.get_git_ref(f'heads/{temp_base_branch}').delete()
+
+  # TODO: Delete temp PR (?)
 
   # Make an annotated tag at the resulting commit SHA
   resulting_tag: GitTag = repo.create_git_tag(
     tag_params.tag,
     tag_params.tag_message,
-    pr_merge_status.sha,
-    'commit'
+    temp_pr_merge_status.sha,
+    'commit huhuhu'
   )
   annotated_tag: GitRef = repo.create_git_ref(
     f'refs/tags/{resulting_tag.tag}',
@@ -78,6 +104,7 @@ def merge_and_tag(repo: Repository, merge_params: MergeCommitInfo,
     raise Exception(f'Tag {tag_params.tag} was not ' + \
       'successfully created.')
 
+  # Success!
   return
 
 if __name__ == '__main__':
@@ -95,7 +122,7 @@ if __name__ == '__main__':
   except:
     raise Exception('Repository not found')
 
-  merge_params = MergeCommitInfo(1, MergeMode.squash, 'test', 'moretest')
+  merge_params = MergeCommitInfo(17, MergeMode.squash, 'test', 'moretest')
   tag_params = TagInfo('0.0.0', 'tagtest')
 
   merge_and_tag(repo, merge_params, tag_params)
