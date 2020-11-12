@@ -36,6 +36,10 @@ def merge_and_tag(repo: Repository, merge_params: MergeCommitInfo,
   if pr.number != merge_params.pr_id:
     raise Exception(f'Could not fetch PR {merge_params.pr_id}')
 
+  # TODO: create temp branch off latest base branch
+
+  # TODO: change PR base branch to temp branch
+
   # Merge PR
   pr_merge_status: PullRequestMergeStatus = pr.merge(
     merge_params.commit_message,
@@ -47,6 +51,14 @@ def merge_and_tag(repo: Repository, merge_params: MergeCommitInfo,
   if pr_merge_status.merged == False:
     raise Exception(f'PR {merge_params.pr_id} was not ' + \
       'successfully merged.')
+
+  # TODO: open a new PR to merge temp branch to original base branch
+
+  # TODO: rebase merge the new PR to original base branch
+
+  # TODO: delete temp branch
+
+  # TODO: delete temp PR (?)
 
   # Make an annotated tag at the resulting commit SHA
   resulting_tag: GitTag = repo.create_git_tag(
