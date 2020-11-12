@@ -31,14 +31,14 @@ def merge_and_tag(repo: Repository, merge_params: MergeCommitInfo,
   tag_params: TagInfo):
 
   # Get PR
-  pr: PullRequest = repo.get_pull(merge_params.pr_id)
+  pr: PullRequest = repo.get_pull(number=merge_params.pr_id)
 
   # Check if PR was successfully fetched
   if pr.number != merge_params.pr_id:
     raise Exception(f'Could not fetch PR {merge_params.pr_id}')
 
   # Create temp branch off latest base branch
-  source_base_branch: Branch = repo.get_branch(pr.base.ref)
+  source_base_branch: Branch = repo.get_branch(branch=pr.base.ref)
 
   temp_base_branch: str = f'temp_{pr.head.ref}'
   repo.create_git_ref(
@@ -51,9 +51,9 @@ def merge_and_tag(repo: Repository, merge_params: MergeCommitInfo,
 
   # Merge PR to temp branch
   pr_merge_status: PullRequestMergeStatus = pr.merge(
-    merge_params.commit_message,
-    merge_params.commit_title,
-    merge_params.merge_mode
+    commit_message=merge_params.commit_message,
+    commit_title=merge_params.commit_title,
+    merge_method=merge_params.merge_mode
   )
 
   # Check if PR was successfully merged
@@ -72,9 +72,9 @@ def merge_and_tag(repo: Repository, merge_params: MergeCommitInfo,
 
   # Rebase merge the new PR to original base branch
   temp_pr_merge_status: PullRequestMergeStatus = temp_pr.merge(
-    merge_params.commit_message,
-    merge_params.commit_title,
-    MergeMode.rebase.name
+    commit_message=merge_params.commit_message,
+    commit_title=merge_params.commit_title,
+    merge_method=MergeMode.rebase.name
   )
 
   # Check if PR was successfully merged
@@ -82,20 +82,20 @@ def merge_and_tag(repo: Repository, merge_params: MergeCommitInfo,
     raise Exception(f'Temp PR was not successfully merged.')
 
   # Delete temp branch
-  repo.get_git_ref(f'heads/{temp_base_branch}').delete()
+  repo.get_git_ref(ref=f'heads/{temp_base_branch}').delete()
 
   # TODO: Delete temp PR (?)
 
   # Make an annotated tag at the resulting commit SHA
   resulting_tag: GitTag = repo.create_git_tag(
-    tag_params.tag,
-    tag_params.tag_message,
-    temp_pr_merge_status.sha,
-    'commit huhuhu'
+    tag=tag_params.tag,
+    message=tag_params.tag_message,
+    object=temp_pr_merge_status.sha,
+    type='commit'
   )
   annotated_tag: GitRef = repo.create_git_ref(
-    f'refs/tags/{resulting_tag.tag}',
-    resulting_tag.sha
+    ref=f'refs/tags/{resulting_tag.tag}',
+    sha=resulting_tag.sha
   )
 
   # Check if tag was successfully created
@@ -122,7 +122,8 @@ if __name__ == '__main__':
   except:
     raise Exception('Repository not found')
 
-  merge_params = MergeCommitInfo(17, MergeMode.squash, 'test', 'moretest')
-  tag_params = TagInfo('0.0.0', 'tagtest')
+  # TODO: replace MergeCommitInfo args with user inputs
+  merge_params = MergeCommitInfo(20, MergeMode.squash, '(0.0.0) Finally it works', 'I think pygithub is better than gitpython')
+  tag_params = TagInfo('0.0.0', 'Yes')
 
   merge_and_tag(repo, merge_params, tag_params)
