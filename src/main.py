@@ -63,7 +63,7 @@ def merge_and_tag(repo: Repository, merge_params: MergeCommitInfo,
 
   # Open a new PR to merge temp branch to original base branch
   temp_pr: PullRequest = repo.create_pull(
-    title=f'[spekkio-bot] merge pr {merge_params.pr_id}',
+    title=f'(spekkio-bot) merge pr {merge_params.pr_id}',
     body='Opened by Spekkio.',
     base=source_base_branch.name,
     head=temp_base_branch,
@@ -111,7 +111,6 @@ if __name__ == '__main__':
   load_dotenv()
   env = {
     'token': os.getenv('TOKEN'),
-    'username': os.getenv('USERNAME'),
     'repo': os.getenv('FULL_REPO_NAME')
   }
   conn = Github(env['token'])
