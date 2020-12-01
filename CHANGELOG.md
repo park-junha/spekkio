@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 0.4.6
+- Add some rollback logic to `git_merge` in case it fails
+
 ## 0.4.5
 - Change logging prefixes
 
