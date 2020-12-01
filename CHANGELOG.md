@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 0.4.1
+- `git_merge` now unsets local config after completing
+
 ## 0.4.0
 - Renamed former `main.py` to `pygithub_merge`
 - Added a main script at top level

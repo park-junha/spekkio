@@ -46,6 +46,10 @@ if [[ $# -eq 6 ]]; then
     git push && git push --tags
     rc=$?; [[ $rc -ne 0 ]] && exit $rc
 
+    # Unset (bot) committer info
+    git config --local --unset user.name
+    git config --local --unset user.email
+
     exit 0
     ;;
   rebase)
