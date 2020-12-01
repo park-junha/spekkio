@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 0.5.0
+- Added a CHANGELOG checker
+
 ## 0.4.6
 - Add some rollback logic to `git_merge` in case it fails
 
