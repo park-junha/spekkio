@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 0.6.0
+- Added a package.json version checker
+
 ## 0.5.0
 - Added a CHANGELOG checker
 

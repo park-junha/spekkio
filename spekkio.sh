@@ -99,6 +99,29 @@ elif [[ $# -gt 0 ]]; then
     echo "check_changelog complete!" | log "spekkio:sh" $GREEN_LOG
     exit 0
     ;;
+  check_package_json | cpj)
+    if [[ $# -lt 2 ]]; then
+      echo "err: check_package_json \$2 not provided" | log "spekkio:sh" \
+        $GREEN_LOG
+      exit 1
+    fi
+
+    version=$2
+
+    echo "running check_package_json with param $version..." | \
+      log "spekkio:sh" $GREEN_LOG
+    $SRC_DIR/check_package_json/main.sh $version | log \
+      "spekkio:check_package_json:sh" $GREEN_LOG
+
+    exit_code=${PIPESTATUS[0]}
+    if [[ $exit_code -ne 0 ]]; then
+      echo "err: script exited with code $exit_code" | log "spekkio:sh" \
+        $GREEN_LOG
+      exit $exit_code
+    fi
+    echo "check_package_json complete!" | log "spekkio:sh" $GREEN_LOG
+    exit 0
+    ;;
   *)
     invalid
     usage
