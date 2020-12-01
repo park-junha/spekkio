@@ -53,16 +53,16 @@ elif [[ $# -gt 0 ]]; then
     echo -n "[branch]: "
     read branch
     echo -n "[commit message]: "
-    read commit_message
-    echo -n "[tag]: "
-    read tag
-    echo -n "[tag message]: "
-    read tag_message
+    read commit_summary
+    echo -n "[version]: "
+    read version
+
+    commit_message="($version) $commit_summary"
 
     echo "running git_merge with param $git_merge_method..." | \
       log pw3:sh $GREEN_LOG
     $SRC_DIR/git_merge/main.sh $git_merge_method "$base_branch" "$branch" \
-      "$commit_message" "$tag" "$tag_message" | log pw3:sh $GREEN_LOG
+      "$commit_message" "$version" "$commit_summary" | log pw3:sh $GREEN_LOG
 
     exit_code=${PIPESTATUS[0]}
     if [[ $exit_code -ne 0 ]]; then

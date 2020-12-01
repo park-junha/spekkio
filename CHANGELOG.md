@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 0.4.3
+- Combine some inputs in `git_merge`
+
 ## 0.4.2
 - Remove `version`
 
