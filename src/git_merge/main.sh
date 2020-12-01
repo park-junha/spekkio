@@ -22,9 +22,15 @@ if [[ $# -eq 6 ]]; then
     author=$(git log $base_branch.. | grep Author | sed 's/Author: //' | \
       uniq)
 
+    # Get pre existing local configs if they exist
+    username_before=$(git config --local --list | egrep 'user\.name' | \
+      sed 's/user\.name=//')
+    useremail_before=$(git config --local --list | egrep 'user\.email' | \
+      sed 's/user\.email=//')
+
     # Set (bot) committer info
-    git config --local user.name $BOT_USERNAME
-    git config --local user.email $BOT_EMAIL
+    git config --local user.name "$BOT_USERNAME"
+    git config --local user.email "$BOT_EMAIL"
 
     # Checkout to base branch and pull again
     git checkout $base_branch && git pull
@@ -46,9 +52,17 @@ if [[ $# -eq 6 ]]; then
     git push && git push --tags
     rc=$?; [[ $rc -ne 0 ]] && exit $rc
 
-    # Unset (bot) committer info
-    git config --local --unset user.name
-    git config --local --unset user.email
+    # Unset (bot) committer info OR reset to configs before if they existed
+    if [[ -z $username_before ]]; then
+      git config --local --unset user.name
+    else
+      git config --local user.name "$username_before"
+    fi
+    if [[ -z $useremail_before ]]; then
+      git config --local --unset user.email
+    else
+      git config --local user.email "$useremail_before"
+    fi
 
     exit 0
     ;;

@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.4.4
+- Rework `git_merge` to unset local config only if local config did not exist previously
+  - Pre existing local config will be restored otherwise
+
 ## 0.4.3
 - Combine some inputs in `git_merge`
 
