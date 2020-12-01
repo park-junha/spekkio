@@ -28,20 +28,22 @@ if [[ $# -eq 0 ]]; then
 elif [[ $# -gt 0 ]]; then
   case $1 in
   pygithub_merge | pghm)
-    echo "running pygithub_merge..." | log pw3:sh $GREEN_LOG
-    python3 $SRC_DIR/pygithub_merge/main.py | log pw3:py $BLUE_LOG
+    echo "running pygithub_merge..." | log "spekkio:sh" $GREEN_LOG
+    python3 $SRC_DIR/pygithub_merge/main.py | log \
+      "spekkio:pygithub_merge:py" $BLUE_LOG
     exit_code=${PIPESTATUS[0]}
     if [[ $exit_code -ne 0 ]]; then
-      echo "err: script exited with code $exit_code" | log pw3:sh $GREEN_LOG
+      echo "err: script exited with code $exit_code" | log "spekkio:sh" \
+        $GREEN_LOG
       exit $exit_code
     fi
-    echo "complete!" | log pw3:sh $GREEN_LOG
+    echo "complete!" | log "spekkio:sh" $GREEN_LOG
     exit 0
     ;;
   git_merge | gm)
     if [[ $# -eq 1 ]]; then
-      echo "warn: arg \$2 is undefined, defaulting to squash" | \
-        log pw3:sh $GREEN_LOG
+      echo "warn: git_merge arg \$2 not provided, defaulting to squash" | \
+        log "spekkio:sh" $GREEN_LOG
       git_merge_method=squash
     else
       git_merge_method=$2
@@ -60,16 +62,18 @@ elif [[ $# -gt 0 ]]; then
     commit_message="($version) $commit_summary"
 
     echo "running git_merge with param $git_merge_method..." | \
-      log pw3:sh $GREEN_LOG
+      log "spekkio:sh" $GREEN_LOG
     $SRC_DIR/git_merge/main.sh $git_merge_method "$base_branch" "$branch" \
-      "$commit_message" "$version" "$commit_summary" | log pw3:sh $GREEN_LOG
+      "$commit_message" "$version" "$commit_summary" | log \
+      "spekkio:git_merge:sh" $GREEN_LOG
 
     exit_code=${PIPESTATUS[0]}
     if [[ $exit_code -ne 0 ]]; then
-      echo "err: script exited with code $exit_code" | log pw3:sh $GREEN_LOG
+      echo "err: script exited with code $exit_code" | log "spekkio:sh" \
+        $GREEN_LOG
       exit $exit_code
     fi
-    echo "complete!" | log pw3:sh $GREEN_LOG
+    echo "complete!" | log "spekkio:sh" $GREEN_LOG
     exit 0
     ;;
   *)

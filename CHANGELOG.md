@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 0.4.5
+- Change logging prefixes
+
 ## 0.4.4
 - Rework `git_merge` to unset local config only if local config did not exist previously
   - Pre existing local config will be restored otherwise
