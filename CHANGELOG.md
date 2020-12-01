@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 0.6.1
+- CHANGELOG checker now checks if file exists
+
 ## 0.6.0
 - Added a package.json version checker
 
