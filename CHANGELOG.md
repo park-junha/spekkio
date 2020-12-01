@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 0.4.2
+- Remove `version`
+
 ## 0.4.1
 - `git_merge` now unsets local config after completing
 

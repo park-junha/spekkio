@@ -1,6 +1,4 @@
 #!/bin/bash
-VERSION=0.4.0
-
 BASE_DIR="$(cd "$(dirname "$0" )" && pwd )"
 SRC_DIR=$BASE_DIR/src
 
@@ -15,7 +13,6 @@ function usage {
   echo "  [rebase] rebase merge"
   echo "  [merge] merge with merge commit"
   echo "[pygithub_merge, pghm] merge a pull request with pygithub"
-  echo "[version, v] get version"
 }
 
 function invalid {
@@ -74,9 +71,6 @@ elif [[ $# -gt 0 ]]; then
     fi
     echo "complete!" | log pw3:sh $GREEN_LOG
     exit 0
-    ;;
-  version | v)
-    echo $VERSION
     ;;
   *)
     invalid
