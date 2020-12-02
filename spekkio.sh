@@ -12,6 +12,10 @@ function usage {
   echo "  [squash] squash merge"
   echo "  [rebase] rebase merge"
   echo "  [merge] merge with merge commit"
+  echo "[check_changelog, cc] check if a version exists in CHANGELOG.md"
+  echo "  requires 1 paramater: the version to check"
+  echo "[check_package_json, cpj] check if a version exists in package.json"
+  echo "  requires 1 paramater: the version to check"
   echo "[pygithub_merge, pghm] merge a pull request with pygithub"
 }
 

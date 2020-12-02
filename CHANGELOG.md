@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 0.6.2
+- Add `check_changelog, cc` and `check_package_json, cpj` to `usage`
+
 ## 0.6.1
 - CHANGELOG checker now checks if file exists
 
