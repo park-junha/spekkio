@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 0.7.0
+- Remove `pygithub_merge`
+
 ## 0.6.3
 - Use `git push --atomic` in `git_merge`
 

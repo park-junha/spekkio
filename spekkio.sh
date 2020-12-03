@@ -4,7 +4,6 @@ SRC_DIR=$BASE_DIR/src
 
 NC='\033[0m'
 GREEN_LOG='\033[0;32m'
-BLUE_LOG='\033[0;36m'
 
 function usage {
   echo "available options:"
@@ -16,7 +15,6 @@ function usage {
   echo "  requires 1 paramater: the version to check"
   echo "[check_package_json, cpj] check if a version exists in package.json"
   echo "  requires 1 paramater: the version to check"
-  echo "[pygithub_merge, pghm] merge a pull request with pygithub"
 }
 
 function invalid {
@@ -31,19 +29,6 @@ if [[ $# -eq 0 ]]; then
   usage
 elif [[ $# -gt 0 ]]; then
   case $1 in
-  pygithub_merge | pghm)
-    echo "running pygithub_merge..." | log "spekkio:sh" $GREEN_LOG
-    python3 $SRC_DIR/pygithub_merge/main.py | log \
-      "spekkio:pygithub_merge:py" $BLUE_LOG
-    exit_code=${PIPESTATUS[0]}
-    if [[ $exit_code -ne 0 ]]; then
-      echo "err: script exited with code $exit_code" | log "spekkio:sh" \
-        $GREEN_LOG
-      exit $exit_code
-    fi
-    echo "complete!" | log "spekkio:sh" $GREEN_LOG
-    exit 0
-    ;;
   git_merge | gm)
     if [[ $# -eq 1 ]]; then
       echo "warn: git_merge arg \$2 not provided, defaulting to squash" | \
