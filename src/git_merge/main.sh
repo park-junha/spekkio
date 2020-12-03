@@ -110,10 +110,11 @@ if [[ $# -eq 6 ]]; then
     fi
 
     # Push commit and tag
-    git push && git push --tags
+    git push --atomic origin "$base_branch" "$tag"
     rc=$?
     if [[ $rc -ne 0 ]]; then
-      echo "err: \"git push && git push --tags\" returned $rc"
+      echo "err: \"git push --atomic origin \"$base_branch\" \"$tag\"\""
+      echo "     returned $rc"
       echo "rolling back commit and tag..."
       rollback_commit_and_tag
       echo "rolling back temporary git config"
