@@ -1,6 +1,7 @@
 #!/bin/bash
 BASE_DIR="$(cd "$(dirname "$0" )" && pwd )"
 SRC_DIR=$BASE_DIR/src
+ASSETS_DIR=$BASE_DIR/assets
 
 NC='\033[0m'
 GREEN_LOG='\033[0;32m'
@@ -43,10 +44,13 @@ elif [[ $# -gt 0 ]]; then
     read base_branch
     echo -n "[branch]: "
     read branch
-    echo -n "[commit message]: "
-    read commit_summary
     echo -n "[version]: "
     read version
+    temp_filepath=/tmp/spekkio_$RANDOM.tmp
+    cp $ASSETS_DIR/temp_commit_file.tmp $temp_filepath
+    vim $temp_filepath
+    commit_summary=$(cat $temp_filepath | sed '/^#/d')
+    rm $temp_filepath
 
     commit_message="($version) $commit_summary"
 
