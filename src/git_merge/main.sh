@@ -132,7 +132,7 @@ if [[ $# -eq 6 ]]; then
     exit 1
     ;;
   merge)
-    echo "err: sorry, param rebase is not yet supported"
+    echo "err: sorry, param merge is not yet supported"
     exit 1
     ;;
   *)
